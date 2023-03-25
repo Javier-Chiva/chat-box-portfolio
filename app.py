@@ -1,29 +1,25 @@
- import openai
+import openai
 import config
-from flask import Flask, request, jsonify
 
-app = Flask(__name__)
 
 openai.api_key = config.api_key
 
-@app.route('/chatbot', methods=['POST'])
-def chatbot():
-    request_data = request.get_json()
-    user_input = request_data['user_input']
-    
-    messages = [{'role':"system" ,
-                "content": "eres un asistente muy bueno"}]
-    
-    messages.append({"role": "user", "content": user_input})
+messages = [{'role':"system" ,
+            "content": "eres un asistente muy bueno"}]
+while True: 
 
-    response = openai.Completion.create(
-            model="davinci", prompt=f"Sobre que quieres hablar? Usuario: {user_input} AI: ", max_tokens=60)
-
-    response_text = response['choices'][0]['text']
+    content = input("¿Sobre que quieres hablar?")
     
-    messages.append({"role": "assistant", "content": response_text})
-    
-    return jsonify({'response': response_text})
+    if content == "exit":
+        break
 
-if __name__ == '__main__':
-    app.run(debug=True)
+    messages.append({"role": "user", "content": content})
+
+    response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo", messages=messages)
+    
+    response_content = response.choices[0].message.content
+
+    messages.append({"role": "assistant", "content": response_content})
+    
+    print(response_content)
